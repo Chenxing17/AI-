@@ -74,7 +74,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true');
 
-  // 強制載入 Tailwind CSS 引擎 (解決外觀跑掉的問題)
+  // 強制載入 Tailwind CSS 引擎
   useEffect(() => {
     if (!document.getElementById('tailwind-cdn')) {
       const script = document.createElement('script');
@@ -113,7 +113,7 @@ export default function App() {
     const timeout = setTimeout(() => {
       if (loading) {
         setLoading(false);
-        setError("連線逾時：無法從資料庫讀取資料。請檢查 Firebase 安全規則。");
+        setError("連線逾時：無法讀取資料庫，請檢查 Firebase 權限。");
       }
     }, 15000);
 
@@ -179,7 +179,7 @@ export default function App() {
           </div>
         </div>
         <h1 className="text-3xl font-black text-slate-800 mb-2">智宿雲</h1>
-        <p className="text-slate-400 font-medium">正在啟動您的雲端住宿體驗...</p>
+        <p className="text-slate-400 font-medium">載入專屬您的智慧旅程...</p>
       </div>
     );
   }
@@ -190,26 +190,18 @@ export default function App() {
         <div className="bg-red-100 p-6 rounded-3xl text-red-600 mb-8 shadow-inner">
           <AlertTriangle size={64} />
         </div>
-        <h1 className="text-3xl font-black text-slate-800 mb-4">系統異常</h1>
+        <h1 className="text-3xl font-black text-slate-800 mb-4 tracking-tight">系統連線異常</h1>
         <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-red-50 max-w-md w-full text-left">
           <p className="text-red-500 font-mono text-sm break-all mb-6 leading-relaxed">{error}</p>
-          <div className="text-slate-500 text-sm space-y-3 bg-slate-50 p-4 rounded-2xl">
-            <p className="font-bold text-slate-700">解決步驟：</p>
-            <ul className="list-disc ml-5 space-y-1">
-              <li>確保已開啟 Firebase 匿名登入</li>
-              <li>確保 Firestore Rules 設為公開</li>
-              <li>檢查 Vercel 環境變數配置</li>
-            </ul>
-          </div>
         </div>
-        <button onClick={() => window.location.reload()} className="mt-10 bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold transition-all">重新整理</button>
+        <button onClick={() => window.location.reload()} className="mt-10 bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold transition-all">重新載入</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
-      <nav className="bg-white/90 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-40 transition-all">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-blue-100">
+      <nav className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-40 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('home')}>
             <div className="bg-blue-600 p-2 rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform">
@@ -239,7 +231,6 @@ export default function App() {
           <div className="md:hidden bg-white border-t p-6 flex flex-col gap-5 animate-in slide-in-from-top duration-300">
             <button onClick={() => { setView('search'); setIsMenuOpen(false); }} className="text-lg font-bold text-slate-700">搜尋房型</button>
             <button onClick={() => { setView('my-bookings'); setIsMenuOpen(false); }} className="text-lg font-bold text-slate-700">我的訂單</button>
-            <div className="h-px bg-slate-100 my-2"></div>
             {isAdmin ? (
               <button onClick={() => { setView('admin-dashboard'); setIsMenuOpen(false); }} className="text-blue-600 font-black text-left">管理後台中心</button>
             ) : (
@@ -258,10 +249,6 @@ export default function App() {
       </main>
 
       <footer className="mt-20 py-12 bg-white border-t border-slate-100 text-center">
-        <div className="flex justify-center gap-2 mb-4">
-          <div className="bg-blue-600 w-8 h-8 rounded-lg flex items-center justify-center text-white"><Home size={16}/></div>
-          <span className="font-black text-slate-800 uppercase tracking-widest">Cloud Homestay</span>
-        </div>
         <p className="text-slate-400 text-sm">&copy; 2024 智宿雲系統開發團隊. All Rights Reserved.</p>
       </footer>
     </div>
@@ -279,24 +266,6 @@ function HomeView({ onStart }) {
           <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter">智宿雲，<br/>懂您的專屬假期。</h1>
           <p className="text-slate-200 text-lg md:text-xl font-medium max-w-xl mb-10 opacity-90">結合雲端科技與人性化設計，為您媒合全台最頂尖的民宿空間。</p>
           <button onClick={onStart} className="bg-white text-slate-900 px-12 py-5 rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-600 hover:text-white transition-all">立即探索房源</button>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl w-full">
-        <div className="text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-          <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6"><Search size={32}/></div>
-          <h3 className="text-xl font-black mb-2">精準媒合</h3>
-          <p className="text-slate-400 text-sm">即時過濾已訂房源，確保您看到的每一間房都能立即預訂。</p>
-        </div>
-        <div className="text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-          <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6"><Settings size={32}/></div>
-          <h3 className="text-xl font-black mb-2">智慧管理</h3>
-          <p className="text-slate-400 text-sm">系統化處理訂單與房態，讓民宿經營變得前所未有的輕鬆。</p>
-        </div>
-        <div className="text-center p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-          <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6"><CheckCircle size={32}/></div>
-          <h3 className="text-xl font-black mb-2">安全保障</h3>
-          <p className="text-slate-400 text-sm">透過 Firebase 加密技術保護您的個人資訊與訂單隱私。</p>
         </div>
       </div>
     </div>
@@ -329,7 +298,7 @@ function SearchView({ rooms, bookings, userId }) {
   }, [rooms, bookings, startDate, endDate, guests]);
 
   const handleBooking = async () => {
-    if (!guestName || !guestPhone) return alert("請填寫完整資訊");
+    if (!guestName || !guestPhone) return alert("請填寫聯絡資訊");
     const total = calculateTotal(startDate, endDate, bookingRoom);
     try {
       await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'bookings'), {
@@ -351,19 +320,20 @@ function SearchView({ rooms, bookings, userId }) {
   };
 
   return (
-    <div>
+    <div className="animate-in fade-in duration-500">
       <h2 className="text-3xl font-black mb-8 tracking-tight">搜尋房源</h2>
+      {/* 搜尋列 */}
       <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 mb-12 grid grid-cols-1 md:grid-cols-4 gap-6">
         <div>
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">入住日期</label>
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">入住日期</label>
           <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full py-4 px-4 bg-slate-50 border-none rounded-2xl font-bold" />
         </div>
         <div>
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">退房日期</label>
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">退房日期</label>
           <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate} className="w-full py-4 px-4 bg-slate-50 border-none rounded-2xl font-bold" />
         </div>
         <div>
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">旅伴人數</label>
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">旅伴人數</label>
           <select value={guests} onChange={e => setGuests(Number(e.target.value))} className="w-full py-4 px-4 bg-slate-50 border-none rounded-2xl font-bold">
             {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n} 位旅客</option>)}
           </select>
@@ -381,9 +351,9 @@ function SearchView({ rooms, bookings, userId }) {
               <div className="absolute top-4 right-4 bg-white/90 px-4 py-2 rounded-2xl text-xs font-black">最多 {room.capacity} 人</div>
             </div>
             <div className="p-8">
-              <h3 className="text-2xl font-black mb-3">{room.name}</h3>
-              <p className="text-slate-400 text-sm mb-8 line-clamp-2 h-10">{room.description || "體驗智宿雲帶給您的極致舒適體驗。"}</p>
-              <div className="flex items-center justify-between border-t pt-6">
+              <h3 className="text-2xl font-black mb-3 text-slate-800">{room.name}</h3>
+              <p className="text-slate-400 text-sm mb-8 line-clamp-2 h-10">{room.description || "感受雲端科技與人性化設計的和諧美感。"}</p>
+              <div className="flex items-center justify-between border-t border-slate-50 pt-6">
                 <span className="text-2xl font-black text-blue-600">${room.price}<span className="text-xs text-slate-400 font-normal"> /晚</span></span>
                 <button onClick={() => setBookingRoom(room)} disabled={!startDate || !endDate} className={`px-8 py-3 rounded-2xl font-black shadow-lg ${(!startDate || !endDate) ? 'bg-slate-100 text-slate-300' : 'bg-slate-900 text-white hover:bg-blue-600'}`}>立即預訂</button>
               </div>
@@ -402,7 +372,7 @@ function SearchView({ rooms, bookings, userId }) {
             <div className="space-y-4 mb-8">
               <div className="flex justify-between border-b pb-2 text-sm"><span>房型名稱</span><span className="font-bold">{bookingRoom.name}</span></div>
               <div className="flex justify-between border-b pb-2 text-sm"><span>日期範圍</span><span className="font-bold">{startDate} → {endDate}</span></div>
-              <div className="flex justify-between items-end pt-4"><span className="text-slate-400 font-bold">預估金額</span><span className="text-4xl font-black text-red-500">${calculateTotal(startDate, endDate, bookingRoom)}</span></div>
+              <div className="flex justify-between items-end pt-4"><span className="text-slate-400 font-bold">預估總額</span><span className="text-4xl font-black text-red-500">${calculateTotal(startDate, endDate, bookingRoom)}</span></div>
               <input placeholder="住客姓名" className="w-full border-none rounded-2xl p-4 bg-slate-100 font-bold mt-6" value={guestName} onChange={e => setGuestName(e.target.value)} />
               <input placeholder="聯絡電話" className="w-full border-none rounded-2xl p-4 bg-slate-100 font-bold" value={guestPhone} onChange={e => setGuestPhone(e.target.value)} />
             </div>
@@ -418,25 +388,25 @@ function MyBookingsView({ bookings, userId }) {
   const myBookings = bookings.filter(b => b.userId === userId || b.userId === 'anonymous').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-3xl font-black mb-10 tracking-tight">我的預訂紀錄</h2>
+      <h2 className="text-3xl font-black mb-10 tracking-tight">我的預訂中心</h2>
       <div className="space-y-6">
         {myBookings.map(b => (
           <div key={b.id} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
             <div className="flex-1 w-full">
               <div className="flex items-center gap-4 mb-4">
                 <h3 className="text-2xl font-black">{b.roomName}</h3>
-                <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black uppercase tracking-widest ${b.status === 'pending' ? 'bg-yellow-50 text-yellow-600' : b.status === 'confirmed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>{b.status === 'pending' ? '審核中' : b.status === 'confirmed' ? '預訂成功' : '已取消'}</span>
+                <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black uppercase tracking-widest ${b.status === 'pending' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600'}`}>{b.status === 'pending' ? '審核中' : '預訂成功'}</span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                <div>日期：{b.startDate}</div>
-                <div>至：{b.endDate}</div>
-                <div>人數：{b.guests}</div>
-                <div className="font-black text-blue-600">總計：${b.totalAmount}</div>
+                <div>入住：{b.startDate}</div>
+                <div>退房：{b.endDate}</div>
+                <div>人數：{b.guests} 位</div>
+                <div className="font-black text-blue-600">實付：${b.totalAmount}</div>
               </div>
             </div>
           </div>
         ))}
-        {myBookings.length === 0 && <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed text-slate-300 font-bold uppercase">尚無預訂資料</div>}
+        {myBookings.length === 0 && <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed text-slate-300 font-bold uppercase tracking-widest">目前無任何預訂紀錄</div>}
       </div>
     </div>
   );
@@ -450,9 +420,10 @@ function AdminLogin({ onLogin }) {
         <div className="bg-blue-600 w-20 h-20 rounded-[2rem] flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-blue-200">
           <Settings size={40} />
         </div>
-        <h2 className="text-3xl font-black mb-10">管理者驗證</h2>
-        <input type="password" placeholder="密碼" className="w-full border-none rounded-2xl p-5 bg-slate-100 font-bold text-center text-xl mb-6" value={pwd} onChange={e => setPwd(e.target.value)} onKeyDown={e => e.key === 'Enter' && onLogin(pwd)} />
-        <button onClick={() => onLogin(pwd)} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl">進入管理後台</button>
+        <h2 className="text-3xl font-black mb-10 tracking-tight">管理者驗證</h2>
+        <input type="password" placeholder="請輸入密碼" className="w-full border-none rounded-2xl p-5 bg-slate-100 font-bold text-center text-xl mb-6 outline-none focus:ring-2 focus:ring-blue-500/20" value={pwd} onChange={e => setPwd(e.target.value)} onKeyDown={e => e.key === 'Enter' && onLogin(pwd)} />
+        <button onClick={() => onLogin(pwd)} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all">登入管理中心</button>
+        <p className="mt-6 text-xs text-slate-300 font-bold uppercase tracking-widest">預設密碼 1234</p>
       </div>
     </div>
   );
@@ -478,13 +449,13 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
   };
 
   return (
-    <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden">
+    <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in duration-500">
       <div className="bg-slate-900 text-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-        <h2 className="text-2xl font-black tracking-tight uppercase tracking-widest">Management Console</h2>
-        <div className="flex gap-3">
-          <button onClick={() => setTab('calendar')} className={`px-6 py-3 rounded-2xl font-black transition-all ${tab === 'calendar' ? 'bg-blue-600' : 'bg-slate-800'}`}>房態</button>
-          <button onClick={() => setTab('rooms')} className={`px-6 py-3 rounded-2xl font-black transition-all ${tab === 'rooms' ? 'bg-blue-600' : 'bg-slate-800'}`}>房源</button>
-          <button onClick={() => setTab('orders')} className={`px-6 py-3 rounded-2xl font-black transition-all ${tab === 'orders' ? 'bg-blue-600' : 'bg-slate-800'}`}>審核</button>
+        <h2 className="text-2xl font-black tracking-tight uppercase tracking-widest">Management System</h2>
+        <div className="flex flex-wrap justify-center gap-3">
+          <button onClick={() => setTab('calendar')} className={`px-6 py-3 rounded-2xl font-black transition-all ${tab === 'calendar' ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-800 hover:bg-slate-700'}`}>房態看板</button>
+          <button onClick={() => setTab('rooms')} className={`px-6 py-3 rounded-2xl font-black transition-all ${tab === 'rooms' ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-800 hover:bg-slate-700'}`}>房型維護</button>
+          <button onClick={() => setTab('orders')} className={`px-6 py-3 rounded-2xl font-black transition-all ${tab === 'orders' ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-800 hover:bg-slate-700'}`}>訂單審核</button>
           <button onClick={onLogout} className="p-3 text-slate-500 hover:text-white transition-colors"><LogOut size={24} /></button>
         </div>
       </div>
@@ -492,32 +463,63 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
       <div className="p-8 md:p-10">
         {tab === 'calendar' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {rooms.map(room => (
-              <div key={room.id} className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
-                <div className="flex justify-between items-center mb-6 font-black">
-                  <h3>{room.name}</h3>
-                  <div className={`w-3 h-3 rounded-full ${room.status === 'available' ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+            {rooms.map(room => {
+              const active = bookings.filter(b => b.roomId === room.id && b.status !== 'cancelled');
+              return (
+                <div key={room.id} className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 hover:bg-white hover:shadow-xl transition-all">
+                  <div className="flex justify-between items-center mb-6 font-black">
+                    <h3 className="text-lg text-slate-800">{room.name}</h3>
+                    <div className={`w-3 h-3 rounded-full ${room.status === 'available' ? 'bg-green-500' : 'bg-orange-500'} animate-pulse`}></div>
+                  </div>
+                  <select value={room.status} onChange={async (e) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', room.id), { status: e.target.value })} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm font-bold shadow-sm outline-none">
+                    <option value="available">● 正常營運</option>
+                    <option value="cleaning">○ 清潔維護中</option>
+                    <option value="maintenance">× 維修暫停中</option>
+                  </select>
+                  <div className="mt-6 space-y-2">
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">近期預訂</p>
+                    {active.slice(0, 2).map(b => (
+                      <div key={b.id} className="bg-white p-3 rounded-xl border border-slate-100 text-[10px] flex justify-between shadow-sm">
+                        <span>{b.startDate.slice(5)} - {b.endDate.slice(5)}</span>
+                        <span className="font-bold">{b.guestName}</span>
+                      </div>
+                    ))}
+                    {active.length === 0 && <p className="text-xs text-slate-300 italic">目前無預訂紀錄</p>}
+                  </div>
                 </div>
-                <select value={room.status} onChange={async (e) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', room.id), { status: e.target.value })} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm font-bold shadow-sm">
-                  <option value="available">營運中</option>
-                  <option value="cleaning">清潔中</option>
-                  <option value="maintenance">維修中</option>
-                </select>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {tab === 'rooms' && (
           <div>
-            <button onClick={() => setEditingRoom({ name: '', price: 2000, holidayPrice: 2500, capacity: 2, description: '', imageUrl: '' })} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black mb-8">新增房源</button>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-black text-slate-800">房源資產管理</h3>
+              <button onClick={() => setEditingRoom({ name: '', price: 2000, holidayPrice: 2500, capacity: 2, description: '', imageUrl: '' })} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-black shadow-lg shadow-blue-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"><Plus size={20} /> 新增房源</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {rooms.map(room => (
-                <div key={room.id} className="bg-white border p-6 rounded-3xl flex justify-between items-center">
-                  <span className="font-bold">{room.name}</span>
-                  <div className="flex gap-2">
-                    <button onClick={() => setEditingRoom(room)} className="p-3 bg-slate-100 rounded-xl"><Settings size={18} /></button>
-                    <button onClick={async () => await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', room.id))} className="p-3 bg-red-50 text-red-500 rounded-xl"><Trash2 size={18} /></button>
+                <div key={room.id} className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all">
+                  <div className="h-40 bg-slate-100 relative">
+                    <img src={room.imageUrl || "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=800"} className="w-full h-full object-cover" alt={room.name} />
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <button onClick={() => setEditingRoom(room)} className="bg-white/90 backdrop-blur-md p-3 rounded-2xl text-blue-600 shadow-xl"><Settings size={18} /></button>
+                      <button onClick={async () => await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', room.id))} className="bg-white/90 backdrop-blur-md p-3 rounded-2xl text-red-500 shadow-xl"><Trash2 size={18} /></button>
+                    </div>
+                  </div>
+                  <div className="p-8">
+                    <h4 className="font-black text-xl mb-3">{room.name}</h4>
+                    <div className="flex justify-between items-center pt-4 border-t border-slate-50">
+                      <div>
+                        <span className="text-[10px] font-black text-slate-300 uppercase block mb-1">容納人數</span>
+                        <span className="font-bold text-slate-600 text-sm">{room.capacity} 人</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-black text-slate-300 uppercase block mb-1">每晚價格 (平/假)</span>
+                        <span className="font-black text-slate-800 text-sm">${room.price} / ${room.holidayPrice}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -526,39 +528,79 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
         )}
 
         {tab === 'orders' && (
-          <div className="space-y-4">
-            {bookings.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(b => (
-              <div key={b.id} className="bg-slate-50 border p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="w-full">
-                  <div className="font-black text-lg">{b.guestName} <span className="text-sm font-normal text-slate-400">({b.roomName})</span></div>
-                  <div className="text-sm text-slate-500">{b.startDate} → {b.endDate} | ${b.totalAmount}</div>
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-8">全站預訂審核</h3>
+            <div className="space-y-4">
+              {bookings.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(b => (
+                <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:bg-white hover:shadow-xl transition-all">
+                  <div className="w-full">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xl font-black text-slate-800">{b.guestName}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-lg font-black tracking-widest uppercase ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-white text-slate-400 border'}`}>{b.status}</span>
+                      <span className="text-[10px] text-slate-300 font-bold ml-auto">{b.guestPhone}</span>
+                    </div>
+                    <div className="text-sm text-slate-500 font-medium flex flex-wrap gap-x-6">
+                      <span>房型：{b.roomName}</span>
+                      <span>日期：{b.startDate} → {b.endDate}</span>
+                      <span className="font-black text-blue-600 tracking-tighter">總金額：${b.totalAmount}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 w-full md:w-auto">
+                    {b.status === 'pending' && <button onClick={() => updateBookingStatus(b.id, 'confirmed')} className="flex-1 md:flex-none bg-blue-600 text-white px-8 py-3 rounded-2xl text-sm font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition-colors">審核通過</button>}
+                    {b.status !== 'cancelled' && <button onClick={() => updateBookingStatus(b.id, 'cancelled')} className="flex-1 md:flex-none bg-white text-red-500 border border-red-50 px-8 py-3 rounded-2xl text-sm font-black hover:bg-red-50 transition-colors">拒絕預訂</button>}
+                  </div>
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                  {b.status === 'pending' && <button onClick={() => updateBookingStatus(b.id, 'confirmed')} className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-xl font-bold">核准</button>}
-                  {b.status !== 'cancelled' && <button onClick={() => updateBookingStatus(b.id, 'cancelled')} className="flex-1 border border-red-100 text-red-400 px-6 py-2 rounded-xl font-bold">取消</button>}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
 
+      {/* 房型編輯 Modal */}
       {editingRoom && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-xl p-10 shadow-2xl animate-in zoom-in duration-300">
-            <h3 className="text-2xl font-black mb-8">房型維護</h3>
-            <div className="space-y-4">
-              <input value={editingRoom.name} onChange={e => setEditingRoom({...editingRoom, name: e.target.value})} className="w-full border-none rounded-2xl p-4 bg-slate-100 font-bold" placeholder="房型名稱" />
-              <div className="flex gap-4">
-                <input type="number" value={editingRoom.price} onChange={e => setEditingRoom({...editingRoom, price: Number(e.target.value)})} className="flex-1 border-none rounded-2xl p-4 bg-slate-100 font-bold" placeholder="平日價" />
-                <input type="number" value={editingRoom.holidayPrice} onChange={e => setEditingRoom({...editingRoom, holidayPrice: Number(e.target.value)})} className="flex-1 border-none rounded-2xl p-4 bg-slate-100 font-bold" placeholder="假日價" />
+          <div className="bg-white rounded-[3rem] w-full max-w-2xl p-10 shadow-2xl animate-in zoom-in duration-300 relative">
+            <button onClick={() => setEditingRoom(null)} className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl text-slate-400 transition-colors"><X/></button>
+            <h3 className="text-3xl font-black mb-10 text-slate-800 tracking-tight">{editingRoom.id ? '更新房源資料' : '新增智宿雲房源'}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">房型名稱</label>
+                <input value={editingRoom.name} onChange={e => setEditingRoom({...editingRoom, name: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-500/10 font-bold outline-none transition-all" placeholder="例如：智宿雲景套房" />
               </div>
-              <input value={editingRoom.imageUrl} onChange={e => setEditingRoom({...editingRoom, imageUrl: e.target.value})} className="w-full border-none rounded-2xl p-4 bg-slate-100 font-bold" placeholder="照片 URL" />
-              <textarea value={editingRoom.description} onChange={e => setEditingRoom({...editingRoom, description: e.target.value})} className="w-full border-none rounded-2xl p-4 bg-slate-100 font-bold h-24" placeholder="介紹文案..." />
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">平日價格</label>
+                <input type="number" value={editingRoom.price} onChange={e => setEditingRoom({...editingRoom, price: Number(e.target.value)})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none" />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">假日價格</label>
+                <input type="number" value={editingRoom.holidayPrice} onChange={e => setEditingRoom({...editingRoom, holidayPrice: Number(e.target.value)})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none" />
+              </div>
+              <div className="md:col-span-2 bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
+                <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest px-2 mb-3 block">最大容納人數 (設定後搜尋過濾將以此為準)</label>
+                <div className="flex items-center gap-4">
+                  <input 
+                    type="range" 
+                    min="1" 
+                    max="10" 
+                    value={editingRoom.capacity || 2} 
+                    onChange={e => setEditingRoom({...editingRoom, capacity: Number(e.target.value)})} 
+                    className="flex-1 accent-blue-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" 
+                  />
+                  <span className="bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-blue-200">{editingRoom.capacity || 2}</span>
+                </div>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">照片 URL</label>
+                <input value={editingRoom.imageUrl} onChange={e => setEditingRoom({...editingRoom, imageUrl: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none" placeholder="https://unsplash.com/..." />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">房型內容描述</label>
+                <textarea value={editingRoom.description} onChange={e => setEditingRoom({...editingRoom, description: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 font-bold h-28 outline-none transition-all resize-none" placeholder="描述房間的特色設備..." />
+              </div>
             </div>
-            <div className="mt-8 flex gap-4">
-              <button onClick={() => setEditingRoom(null)} className="flex-1 py-4 border-2 rounded-2xl font-bold">取消</button>
-              <button onClick={() => saveRoom(editingRoom)} className="flex-1 py-4 bg-blue-600 text-white rounded-[2rem] font-bold shadow-xl shadow-blue-200">儲存變更</button>
+            <div className="mt-12 flex gap-4">
+              <button onClick={() => setEditingRoom(null)} className="flex-1 py-5 border-2 border-slate-50 rounded-2xl font-black text-slate-400 hover:bg-slate-50 transition-all">取消</button>
+              <button onClick={() => saveRoom(editingRoom)} className="flex-1 py-5 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">確認儲存房型資料</button>
             </div>
           </div>
         </div>
@@ -567,7 +609,7 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
   );
 }
 
-// 修正動畫樣式
+// 慢速旋轉動畫
 if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.innerHTML = `
