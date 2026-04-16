@@ -1,30 +1,45 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { 
-  getFirestore, collection, doc, getDoc, getDocs, setDoc, 
-  addDoc, updateDoc, deleteDoc, onSnapshot, query, where 
+  getFirestore, collection, doc, setDoc, 
+  addDoc, updateDoc, deleteDoc, onSnapshot
 } from 'firebase/firestore';
 import { 
   getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken 
 } from 'firebase/auth';
 import { 
-  Calendar, Home, User, Settings, Search, Plus, Trash2, 
-  LogOut, CheckCircle, XCircle, Clock, Tool, Menu, X, Image as ImageIcon
+  Home, Settings, Search, Plus, Trash2, 
+  LogOut, CheckCircle, Menu, X
 } from 'lucide-react';
 
-// --- Firebase 配置 (優先使用系統環境變數) ---
-const firebaseConfig = typeof __firebase_config !== 'undefined' 
-  ? JSON.parse(__firebase_config) 
-  : {
-      apiKey: "AIzaSyA3oh6tq2TttSHaPy1_HgjaFSv5kMRl_rc",
-      authDomain: "ai-0416.firebaseapp.com",
-      projectId: "ai-0416",
-      storageBucket: "ai-0416.firebasestorage.app",
-      messagingSenderId: "224222328655",
-      appId: "1:224222328655:web:077968d5a54dc00f4cb73a",
-      measurementId: "G-L1MKZ8LFN6"
-    };
+// --- Firebase 配置 (相容 Vercel 環境與 Canvas 環境) ---
+const getFirebaseConfig = () => {
+  try {
+    // 1. 優先嘗試讀取 Vite 環境變數 (Vercel 部署建議設定)
+    if (import.meta.env?.VITE_FIREBASE_CONFIG) {
+      return JSON.parse(import.meta.env.VITE_FIREBASE_CONFIG);
+    }
+    // 2. 嘗試讀取系統全局變數
+    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+      return JSON.parse(__firebase_config);
+    }
+  } catch (e) {
+    console.error("Firebase Config Parse Error", e);
+  }
+  
+  // 3. 預設備用配置
+  return {
+    apiKey: "AIzaSyA3oh6tq2TttSHaPy1_HgjaFSv5kMRl_rc",
+    authDomain: "ai-0416.firebaseapp.com",
+    projectId: "ai-0416",
+    storageBucket: "ai-0416.firebasestorage.app",
+    messagingSenderId: "224222328655",
+    appId: "1:224222328655:web:077968d5a54dc00f4cb73a",
+    measurementId: "G-L1MKZ8LFN6"
+  };
+};
 
+const firebaseConfig = getFirebaseConfig();
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -232,7 +247,6 @@ function HomeView({ onStart }) {
   );
 }
 
-// 其餘功能組件保持一致，僅對文案稍作優化
 function SearchView({ rooms, bookings, userId }) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -385,7 +399,6 @@ function SearchView({ rooms, bookings, userId }) {
   );
 }
 
-// 其餘 MyBookingsView, AdminLogin, AdminDashboard 保持與最新版 App.jsx 一致的邏輯，文案也已同步更新
 function MyBookingsView({ bookings, rooms, userId }) {
   const myBookings = bookings.filter(b => b.userId === userId || b.userId === 'anonymous').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -592,7 +605,6 @@ function AdminDashboard({ rooms, bookings, settings, onLogout }) {
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-black text-gray-800">{b.guestName}</span>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${b.status === 'confirmed' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'}`}>{b.status.toUpperCase()}</span>
-                      <span className="text-[10px] text-gray-300 font-mono">{new Date(b.createdAt).toLocaleString()}</span>
                     </div>
                     <div className="text-sm text-gray-500">
                       房型：<span className="text-gray-800 font-medium">{b.roomName}</span> | 日期：{b.startDate} ~ {b.endDate} | 金額：<span className="text-blue-600 font-bold">${b.totalAmount}</span>
@@ -633,13 +645,13 @@ function AdminDashboard({ rooms, bookings, settings, onLogout }) {
             <h3 className="text-2xl font-black mb-8 text-gray-800">{editingRoom.id ? '編輯房源資訊' : '新增智宿雲房源'}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <input value={editingRoom.name} onChange={e => setEditingRoom({...editingRoom, name: e.target.value})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500/10 outline-none transition" placeholder="房型名稱 (如：智宿經典雙人)" />
+                <input value={editingRoom.name} onChange={e => setEditingRoom({...editingRoom, name: e.target.value})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500/10 outline-none transition" placeholder="房型名稱" />
               </div>
               <input type="number" value={editingRoom.price} onChange={e => setEditingRoom({...editingRoom, price: Number(e.target.value)})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white transition" placeholder="平日價格" />
               <input type="number" value={editingRoom.holidayPrice} onChange={e => setEditingRoom({...editingRoom, holidayPrice: Number(e.target.value)})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white transition" placeholder="假日價格" />
               <input type="number" value={editingRoom.capacity} onChange={e => setEditingRoom({...editingRoom, capacity: Number(e.target.value)})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white transition" placeholder="容納人數" />
-              <input value={editingRoom.imageUrl} onChange={e => setEditingRoom({...editingRoom, imageUrl: e.target.value})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white transition" placeholder="實景照片 URL" />
-              <textarea value={editingRoom.description} onChange={e => setEditingRoom({...editingRoom, description: e.target.value})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 h-32 md:col-span-2 focus:bg-white transition" placeholder="房型詳細特色介紹..." />
+              <input value={editingRoom.imageUrl} onChange={e => setEditingRoom({...editingRoom, imageUrl: e.target.value})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 focus:bg-white transition" placeholder="照片 URL" />
+              <textarea value={editingRoom.description} onChange={e => setEditingRoom({...editingRoom, description: e.target.value})} className="w-full border-gray-100 rounded-2xl p-4 bg-gray-50 h-32 md:col-span-2 focus:bg-white transition" placeholder="內容介紹..." />
             </div>
             <div className="mt-10 flex gap-4">
               <button onClick={() => setEditingRoom(null)} className="flex-1 py-4 border-2 border-gray-50 rounded-2xl font-bold text-gray-400 hover:bg-gray-50 transition">取消</button>
