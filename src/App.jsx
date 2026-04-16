@@ -9,7 +9,7 @@ import {
 } from 'firebase/auth';
 import { 
   Home, Settings, Search, Plus, Trash2, 
-  LogOut, CheckCircle, Menu, X, AlertTriangle, Calendar as CalendarIcon, Users, MapPin, Clock
+  LogOut, CheckCircle, Menu, X, AlertTriangle, Calendar as CalendarIcon, Users, MapPin, Clock, XCircle
 } from 'lucide-react';
 
 // --- Firebase 配置優化 ---
@@ -124,7 +124,7 @@ export default function App() {
       setLoading(false);
       clearTimeout(timeout);
     }, (err) => {
-      setError(`資料讀取失敗: ${err.message}`);
+      setError(`房源讀取失敗: ${err.message}`);
       setLoading(false);
       clearTimeout(timeout);
     });
@@ -321,8 +321,7 @@ function SearchView({ rooms, bookings, userId }) {
 
   return (
     <div className="animate-in fade-in duration-500">
-      <h2 className="text-3xl font-black mb-8 tracking-tight">搜尋房源</h2>
-      {/* 搜尋列 */}
+      <h2 className="text-3xl font-black mb-8 tracking-tight text-slate-800">搜尋房源</h2>
       <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 mb-12 grid grid-cols-1 md:grid-cols-4 gap-6">
         <div>
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">入住日期</label>
@@ -385,27 +384,56 @@ function SearchView({ rooms, bookings, userId }) {
 }
 
 function MyBookingsView({ bookings, userId }) {
+  // 過濾屬於該使用者的訂單，並按日期排序
   const myBookings = bookings.filter(b => b.userId === userId || b.userId === 'anonymous').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // 輔助函式：取得狀態顯示文字與樣式
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'confirmed': return { text: '預訂成功', style: 'bg-green-50 text-green-600 border-green-100', icon: <CheckCircle size={14} /> };
+      case 'cancelled': return { text: '訂單已拒絕', style: 'bg-red-50 text-red-600 border-red-100', icon: <XCircle size={14} /> };
+      case 'pending':
+      default: return { text: '審核中', style: 'bg-yellow-50 text-yellow-600 border-yellow-100', icon: <Clock size={14} /> };
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-3xl font-black mb-10 tracking-tight">我的預訂中心</h2>
+    <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+      <h2 className="text-3xl font-black mb-10 tracking-tight text-slate-800">我的預訂中心</h2>
       <div className="space-y-6">
-        {myBookings.map(b => (
-          <div key={b.id} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
-            <div className="flex-1 w-full">
-              <div className="flex items-center gap-4 mb-4">
-                <h3 className="text-2xl font-black">{b.roomName}</h3>
-                <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black uppercase tracking-widest ${b.status === 'pending' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600'}`}>{b.status === 'pending' ? '審核中' : '預訂成功'}</span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                <div>入住：{b.startDate}</div>
-                <div>退房：{b.endDate}</div>
-                <div>人數：{b.guests} 位</div>
-                <div className="font-black text-blue-600">實付：${b.totalAmount}</div>
+        {myBookings.map(b => {
+          const status = getStatusLabel(b.status);
+          return (
+            <div key={b.id} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center transition-all hover:shadow-md">
+              <div className="flex-1 w-full">
+                <div className="flex items-center gap-4 mb-4">
+                  <h3 className="text-2xl font-black text-slate-800">{b.roomName}</h3>
+                  <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black uppercase tracking-widest border flex items-center gap-1.5 ${status.style}`}>
+                    {status.icon} {status.text}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-300 uppercase mb-1">入住</label>
+                    <span className="font-bold text-slate-600">{b.startDate}</span>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-300 uppercase mb-1">退房</label>
+                    <span className="font-bold text-slate-600">{b.endDate}</span>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-300 uppercase mb-1">人數</label>
+                    <span className="font-bold text-slate-600">{b.guests} 位</span>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-300 uppercase mb-1">總額</label>
+                    <span className="font-black text-blue-600">${b.totalAmount}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {myBookings.length === 0 && <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed text-slate-300 font-bold uppercase tracking-widest">目前無任何預訂紀錄</div>}
       </div>
     </div>
@@ -420,7 +448,7 @@ function AdminLogin({ onLogin }) {
         <div className="bg-blue-600 w-20 h-20 rounded-[2rem] flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-blue-200">
           <Settings size={40} />
         </div>
-        <h2 className="text-3xl font-black mb-10 tracking-tight">管理者驗證</h2>
+        <h2 className="text-3xl font-black mb-10 tracking-tight text-slate-800">管理者驗證</h2>
         <input type="password" placeholder="請輸入密碼" className="w-full border-none rounded-2xl p-5 bg-slate-100 font-bold text-center text-xl mb-6 outline-none focus:ring-2 focus:ring-blue-500/20" value={pwd} onChange={e => setPwd(e.target.value)} onKeyDown={e => e.key === 'Enter' && onLogin(pwd)} />
         <button onClick={() => onLogin(pwd)} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all">登入管理中心</button>
         <p className="mt-6 text-xs text-slate-300 font-bold uppercase tracking-widest">預設密碼 1234</p>
@@ -445,7 +473,12 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
   };
 
   const updateBookingStatus = async (id, status) => {
-    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id), { status });
+    try {
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id), { status });
+      // 成功時不顯示 alert 以優化體驗，狀態會透過即時監聽自動更新
+    } catch (err) {
+      alert("更新狀態失敗");
+    }
   };
 
   return (
@@ -460,7 +493,7 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
         </div>
       </div>
 
-      <div className="p-8 md:p-10">
+      <div className="p-8 md:p-10 text-slate-800">
         {tab === 'calendar' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {rooms.map(room => {
@@ -477,7 +510,7 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
                     <option value="maintenance">× 維修暫停中</option>
                   </select>
                   <div className="mt-6 space-y-2">
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">近期預訂</p>
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest font-bold">近期預訂</p>
                     {active.slice(0, 2).map(b => (
                       <div key={b.id} className="bg-white p-3 rounded-xl border border-slate-100 text-[10px] flex justify-between shadow-sm">
                         <span>{b.startDate.slice(5)} - {b.endDate.slice(5)}</span>
@@ -509,14 +542,14 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
                     </div>
                   </div>
                   <div className="p-8">
-                    <h4 className="font-black text-xl mb-3">{room.name}</h4>
+                    <h4 className="font-black text-xl mb-3 text-slate-800">{room.name}</h4>
                     <div className="flex justify-between items-center pt-4 border-t border-slate-50">
                       <div>
-                        <span className="text-[10px] font-black text-slate-300 uppercase block mb-1">容納人數</span>
+                        <span className="text-[10px] font-black text-slate-300 uppercase block mb-1 font-bold">容納人數</span>
                         <span className="font-bold text-slate-600 text-sm">{room.capacity} 人</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] font-black text-slate-300 uppercase block mb-1">每晚價格 (平/假)</span>
+                        <span className="text-[10px] font-black text-slate-300 uppercase block mb-1 font-bold">每晚價格 (平/假)</span>
                         <span className="font-black text-slate-800 text-sm">${room.price} / ${room.holidayPrice}</span>
                       </div>
                     </div>
@@ -531,12 +564,17 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
           <div className="space-y-6">
             <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-8">全站預訂審核</h3>
             <div className="space-y-4">
-              {bookings.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(b => (
+              {bookings.sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt)).map(b => (
                 <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:bg-white hover:shadow-xl transition-all">
                   <div className="w-full">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-xl font-black text-slate-800">{b.guestName}</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-lg font-black tracking-widest uppercase ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-white text-slate-400 border'}`}>{b.status}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-lg font-black tracking-widest uppercase border ${
+                        b.status === 'confirmed' ? 'bg-green-50 text-green-600 border-green-100' :
+                        b.status === 'cancelled' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-white text-slate-400 border-slate-200'
+                      }`}>
+                        {b.status === 'confirmed' ? '已核准' : b.status === 'cancelled' ? '已拒絕' : '審核中'}
+                      </span>
                       <span className="text-[10px] text-slate-300 font-bold ml-auto">{b.guestPhone}</span>
                     </div>
                     <div className="text-sm text-slate-500 font-medium flex flex-wrap gap-x-6">
@@ -546,8 +584,13 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
                     </div>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
-                    {b.status === 'pending' && <button onClick={() => updateBookingStatus(b.id, 'confirmed')} className="flex-1 md:flex-none bg-blue-600 text-white px-8 py-3 rounded-2xl text-sm font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition-colors">審核通過</button>}
-                    {b.status !== 'cancelled' && <button onClick={() => updateBookingStatus(b.id, 'cancelled')} className="flex-1 md:flex-none bg-white text-red-500 border border-red-50 px-8 py-3 rounded-2xl text-sm font-black hover:bg-red-50 transition-colors">拒絕預訂</button>}
+                    {/* 即使已經確認過，管理員仍可隨時修改狀態（例如拒絕或重新核准） */}
+                    {b.status !== 'confirmed' && (
+                      <button onClick={() => updateBookingStatus(b.id, 'confirmed')} className="flex-1 md:flex-none bg-blue-600 text-white px-8 py-3 rounded-2xl text-sm font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition-colors">核准預訂</button>
+                    )}
+                    {b.status !== 'cancelled' && (
+                      <button onClick={() => updateBookingStatus(b.id, 'cancelled')} className="flex-1 md:flex-none bg-white text-red-500 border border-red-50 px-8 py-3 rounded-2xl text-sm font-black hover:bg-red-50 transition-colors">拒絕/取消</button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -564,19 +607,19 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
             <h3 className="text-3xl font-black mb-10 text-slate-800 tracking-tight">{editingRoom.id ? '更新房源資料' : '新增智宿雲房源'}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">房型名稱</label>
-                <input value={editingRoom.name} onChange={e => setEditingRoom({...editingRoom, name: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-500/10 font-bold outline-none transition-all" placeholder="例如：智宿雲景套房" />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block font-bold">房型名稱</label>
+                <input value={editingRoom.name} onChange={e => setEditingRoom({...editingRoom, name: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-500/10 font-bold outline-none transition-all text-slate-800" placeholder="例如：智宿雲景套房" />
               </div>
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">平日價格</label>
-                <input type="number" value={editingRoom.price} onChange={e => setEditingRoom({...editingRoom, price: Number(e.target.value)})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none" />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block font-bold">平日價格</label>
+                <input type="number" value={editingRoom.price} onChange={e => setEditingRoom({...editingRoom, price: Number(e.target.value)})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none text-slate-800" />
               </div>
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">假日價格</label>
-                <input type="number" value={editingRoom.holidayPrice} onChange={e => setEditingRoom({...editingRoom, holidayPrice: Number(e.target.value)})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none" />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block font-bold">假日價格</label>
+                <input type="number" value={editingRoom.holidayPrice} onChange={e => setEditingRoom({...editingRoom, holidayPrice: Number(e.target.value)})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none text-slate-800" />
               </div>
               <div className="md:col-span-2 bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
-                <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest px-2 mb-3 block">最大容納人數 (設定後搜尋過濾將以此為準)</label>
+                <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest px-2 mb-3 block font-bold">最大容納人數 (設定後搜尋過濾將以此為準)</label>
                 <div className="flex items-center gap-4">
                   <input 
                     type="range" 
@@ -590,12 +633,12 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
                 </div>
               </div>
               <div className="md:col-span-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">照片 URL</label>
-                <input value={editingRoom.imageUrl} onChange={e => setEditingRoom({...editingRoom, imageUrl: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none" placeholder="https://unsplash.com/..." />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block font-bold">照片 URL</label>
+                <input value={editingRoom.imageUrl} onChange={e => setEditingRoom({...editingRoom, imageUrl: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 focus:bg-white font-bold transition-all outline-none text-slate-800" placeholder="https://unsplash.com/..." />
               </div>
               <div className="md:col-span-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block">房型內容描述</label>
-                <textarea value={editingRoom.description} onChange={e => setEditingRoom({...editingRoom, description: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 font-bold h-28 outline-none transition-all resize-none" placeholder="描述房間的特色設備..." />
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 mb-2 block font-bold">房型內容描述</label>
+                <textarea value={editingRoom.description} onChange={e => setEditingRoom({...editingRoom, description: e.target.value})} className="w-full border-none rounded-2xl p-5 bg-slate-100 font-bold h-28 outline-none transition-all resize-none text-slate-800" placeholder="描述房間的特色設備..." />
               </div>
             </div>
             <div className="mt-12 flex gap-4">
@@ -611,10 +654,11 @@ function AdminDashboard({ rooms, bookings, onLogout }) {
 
 // 慢速旋轉動畫
 if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.innerHTML = `
+  const style = document.createElement('script'); // 改用 script 標籤載入以避免某些編譯器對樣式標籤的處理問題
+  const styleElement = document.createElement('style');
+  styleElement.innerHTML = `
     @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin-slow { animation: spin-slow 8s linear infinite; }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(styleElement);
 }
